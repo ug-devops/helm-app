@@ -1,0 +1,39 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build and Push Docker image
+      run: |
+        IMAGE_URI=120569628027.dkr.ecr.us-east-1.amazonaws.com/helm-app:latest
+        docker build -t $IMAGE_URI .
+        docker push $IMAGE_URI
+
+    - name: Set up Kubeconfig
+      run: |
+        aws eks update-kubeconfig --region us-east-1 --name eks-cluster7FCHVyWb
+
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install helm-app ./helm-chart --namespace helm-app
+
