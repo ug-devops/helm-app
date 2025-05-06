@@ -23,11 +23,16 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and Push Docker image
+    - name: Build and Push Docker Image
+      env:
+        ECR_REGISTRY: 120569628027.dkr.ecr.us-east-1.amazonaws.com
+        IMAGE_NAME: helm-app
       run: |
-        IMAGE_URI=120569628027.dkr.ecr.us-east-1.amazonaws.com/helm-app:latest
+        IMAGE_TAG=latest
+        IMAGE_URI=$ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
         docker build --no-cache -t $IMAGE_URI ./app
         docker push $IMAGE_URI
+        echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
     - name: Set up Kubeconfig
       run: |
@@ -35,5 +40,9 @@ jobs:
 
     - name: Deploy with Helm
       run: |
-        helm upgrade --install helm-app ./helm-chart --namespace helm-app
+        helm upgrade --install helm-app ./helm-chart \
+          --namespace helm-app \
+          --create-namespace \
+          --set image.repository=120569628027.dkr.ecr.us-east-1.amazonaws.com/helm-app \
+          --set image.tag=latest
 
