@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: 120569628027.dkr.ecr.us-east-1.amazonaws.com/helm-app
+  repository: ""
   pullPolicy: Always
-  tag: {{ .Values.image.tag }}
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
