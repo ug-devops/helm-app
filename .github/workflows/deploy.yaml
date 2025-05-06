@@ -26,7 +26,7 @@ jobs:
     - name: Build and Push Docker image
       run: |
         IMAGE_URI=120569628027.dkr.ecr.us-east-1.amazonaws.com/helm-app:latest
-        docker build -t $IMAGE_URI .
+        docker build -t $IMAGE_URI ./app
         docker push $IMAGE_URI
 
     - name: Set up Kubeconfig
